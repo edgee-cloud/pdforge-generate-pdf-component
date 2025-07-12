@@ -1,0 +1,24 @@
+manifest-version = 1
+
+[component]
+name = "Pdforge Generate PDF"
+version = "1.0.0"
+
+category = "edge-function"
+subcategory = "wasm-function"
+description = "Edge function component to generate PDF from Template and Data"
+documentation = "https://github.com/edgee-cloud/pdforge-generate-pdf-component"
+repository = "https://github.com/edgee-cloud/pdforge-generate-pdf-component"
+language = "Rust"
+wit-version = "1.0.0"
+image.pngicon-path = "pdforge.png"
+
+[component.build]
+command = "cargo build --target wasm32-wasip2 --release --target-dir ./target && mv ./target/wasm32-wasip2/release/pdforge_generate_pdf_component.wasm ./pdforge-generate-pdf.wasm"
+output_path = "pdforge-generate-pdf.wasm"
+
+[component.settings.api_key]
+title = "Pdforge API Key"
+type = "string"
+required = true
+secret = true
