@@ -14,7 +14,7 @@ wit-version = "1.0.0"
 icon-path = "pdforge.png"
 
 [component.build]
-command = "cargo build --target wasm32-wasip2 --release --target-dir ./target && mv ./target/wasm32-wasip2/release/pdforge_generate_pdf_component.wasm ./pdforge.wasm"
+command = "cargo build --target wasm32-wasip2 --release --target-dir ./target && rm -f ./pdforge.wasm && mv ./target/wasm32-wasip2/release/pdforge_generate_pdf_component.wasm ./pdforge.wasm"
 output_path = "pdforge.wasm"
 
 [component.settings.api_key]
