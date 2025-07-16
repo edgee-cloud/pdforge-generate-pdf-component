@@ -38,30 +38,32 @@ impl Guest for Component {
         let pdforge_response = payload.send(&settings.api_key);
 
         // handle error in case request couldn't be sent
-        if let Err(e) = pdforge_response {
-            let response = helpers::build_response_json_error(&e.to_string(), 500);
-            response.send(resp);
-            return;
-        }
-
-        let pdforge_response = pdforge_response.unwrap();
-        let status_code = pdforge_response.status_code();
-
-        let response_body =
-            String::from_utf8_lossy(&pdforge_response.body().unwrap_or_default()).to_string();
-
-        // parse response into json
-        let json_response: serde_json::Value = match serde_json::from_str(&response_body) {
-            Ok(json) => json,
-            Err(_) => {
+        match pdforge_response {
+            Ok(response) => {
+                let status_code = response.status_code();
+                let response_body =
+                    String::from_utf8_lossy(&response.body().unwrap_or_default()).to_string();
+                let json_response: serde_json::Value = match serde_json::from_str(&response_body) {
+                    Ok(json) => json,
+                    Err(_) => {
+                        let response = helpers::build_response_json_error(
+                            "Failed to parse Pdforge response",
+                            500,
+                        );
+                        response.send(resp);
+                        return;
+                    }
+                };
                 let response =
-                    helpers::build_response_json_error("Failed to parse Pdforge response", 500);
+                    helpers::build_response_json(&json_response.to_string(), status_code);
+                response.send(resp);
+            }
+            Err(e) => {
+                let response = helpers::build_response_json_error(&e.to_string(), 500);
                 response.send(resp);
                 return;
             }
-        };
-        let response = helpers::build_response_json(&json_response.to_string(), status_code);
-        response.send(resp);
+        }
     }
 }
 
