@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 
 const PDFORGE_ENDPOINT: &str = "https://api.pdforge.com/v1/pdf/sync";
 
