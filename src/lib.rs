@@ -60,8 +60,7 @@ impl Guest for Component {
             }
             Err(e) => {
                 let response = helpers::build_response_json_error(&e.to_string(), 500);
-                response.send(resp);
-                return;
+                response.send(resp)
             }
         }
     }
@@ -140,11 +139,12 @@ mod tests {
         let mut headers = HashMap::new();
         headers.insert(
             "x-edgee-component-settings".to_string(),
-            vec![r#"{"api_key": "test_value"}"#.to_string()],
+            vec![r#"{"api_key": "test_value", "template_id": "test_template_id"}"#.to_string()],
         );
 
         let settings = Settings::new(&headers).unwrap();
         assert_eq!(settings.api_key, "test_value");
+        assert_eq!(settings.template_id, "test_template_id");
     }
 
     #[test]
