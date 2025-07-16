@@ -26,8 +26,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./pdforge-generate-pdf.wasm
-          asset_name: pdforge-generate-pdf.wasm
+          asset_path: ./pdforge.wasm
+          asset_name: pdforge.wasm
           asset_content_type: application/wasm
       - name: Push to Edgee Component Registry
         run: edgee component push edgee --yes --changelog "${{ github.event.release.body }}"

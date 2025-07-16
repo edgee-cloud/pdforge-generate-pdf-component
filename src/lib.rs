@@ -33,7 +33,7 @@ impl Guest for Component {
                 return;
             }
         };
-        let payload = PdforgeGeneratePdfPayload::new(body);
+        let payload = PdforgeGeneratePdfPayload::new(body, &settings.template_id);
 
         let pdforge_response = payload.send(&settings.api_key);
 
@@ -44,10 +44,10 @@ impl Guest for Component {
             return;
         }
 
-        let stripe_response = pdforge_response.unwrap();
+        let pdforge_response = pdforge_response.unwrap();
 
         let response_body =
-            String::from_utf8_lossy(&stripe_response.body().unwrap_or_default()).to_string();
+            String::from_utf8_lossy(&pdforge_response.body().unwrap_or_default()).to_string();
 
         // parse response into json
         let json_response: serde_json::Value = match serde_json::from_str(&response_body) {
@@ -88,6 +88,7 @@ fn extract_request_body(req: IncomingRequest) -> anyhow::Result<serde_json::Valu
 #[derive(serde::Deserialize, serde::Serialize, Debug)]
 pub struct Settings {
     pub api_key: String,
+    pub template_id: String,
 }
 
 impl Settings {
@@ -115,7 +116,15 @@ impl Settings {
             .map(String::to_string)
             .unwrap_or_default();
 
-        Ok(Self { api_key })
+        let template_id = setting
+            .get("template_id")
+            .map(String::to_string)
+            .unwrap_or_default();
+
+        Ok(Self {
+            api_key,
+            template_id,
+        })
     }
 }
 
