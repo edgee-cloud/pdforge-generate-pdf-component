@@ -21,7 +21,7 @@ impl PdforgeGeneratePdfPayload {
     pub fn send(&self, api_key: &str) -> anyhow::Result<waki::Response> {
         // the body is url-encoded
 
-        // call the Stripe API
+        // call the PDForge API
         let client = waki::Client::new();
         let response = client
             .post(PDFORGE_ENDPOINT)

@@ -16,7 +16,7 @@
 [![Edgee Component Registry](https://img.shields.io/badge/Edgee_Component_Registry-Public-green.svg)](https://www.edgee.cloud/edgee/pdforge-generate-pdf)
 
 
-This component provides a simple way to integrate the Stripe Billing Portal on [Edgee](https://www.edgee.cloud),
+This component provides a simple way to integrate PDForge Pdf generation API on [Edgee](https://www.edgee.cloud),
 served directly at the edge. You map the component to a specific endpoint such as `/pdforge`, and
 then you invoke it from your frontend code.
 
