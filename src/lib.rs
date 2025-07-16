@@ -45,6 +45,7 @@ impl Guest for Component {
         }
 
         let pdforge_response = pdforge_response.unwrap();
+        let status_code = pdforge_response.status_code();
 
         let response_body =
             String::from_utf8_lossy(&pdforge_response.body().unwrap_or_default()).to_string();
@@ -59,7 +60,7 @@ impl Guest for Component {
                 return;
             }
         };
-        let response = helpers::build_response_json(&json_response.to_string(), 200);
+        let response = helpers::build_response_json(&json_response.to_string(), status_code);
         response.send(resp);
     }
 }
@@ -114,12 +115,12 @@ impl Settings {
         let api_key = setting
             .get("api_key")
             .map(String::to_string)
-            .unwrap_or_default();
+            .ok_or_else(|| anyhow::anyhow!("Missing 'api_key' in settings"))?;
 
         let template_id = setting
             .get("template_id")
             .map(String::to_string)
-            .unwrap_or_default();
+            .ok_or_else(|| anyhow::anyhow!("Missing 'template_id' in settings"))?;
 
         Ok(Self {
             api_key,
