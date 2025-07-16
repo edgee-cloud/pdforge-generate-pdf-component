@@ -1,10 +1,14 @@
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 const PDFORGE_ENDPOINT: &str = "https://api.pdforge.com/v1/pdf/sync";
 
+#[derive(Serialize, Deserialize)]
 pub struct PdforgeGeneratePdfPayload {
-    pub pdf_data: serde_json::Value,
+    #[serde(rename = "templateId")]
     pub template_id: String,
+    #[serde(rename = "data")]
+    pub pdf_data: serde_json::Value,
 }
 
 impl PdforgeGeneratePdfPayload {
@@ -17,13 +21,6 @@ impl PdforgeGeneratePdfPayload {
 
     pub fn send(&self, api_key: &str) -> anyhow::Result<waki::Response> {
         // the body is url-encoded
-        let template_id = self.template_id.clone();
-        let pdf_data = self.pdf_data.clone();
-        let body = json!({
-            "templateId": template_id,
-            "data": pdf_data,
-        })
-        .to_string();
 
         // call the Stripe API
         let client = waki::Client::new();
@@ -31,7 +28,7 @@ impl PdforgeGeneratePdfPayload {
             .post(PDFORGE_ENDPOINT)
             .header("Content-Type", "application/json")
             .header("Authorization", format!("Bearer {api_key}"))
-            .body(body)
+            .body(serde_json::to_string(&self)?)
             .send()?;
 
         Ok(response)
