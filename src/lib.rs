@@ -1,8 +1,8 @@
 mod helpers;
 mod pdforge_payload;
-use std::collections::HashMap;
-use pdforge_payload::PdforgeGeneratePdfPayload;
 use bindings::wasi::http::types::{IncomingRequest, ResponseOutparam};
+use pdforge_payload::PdforgeGeneratePdfPayload;
+use std::collections::HashMap;
 
 mod bindings {
     wit_bindgen::generate!({
@@ -39,14 +39,14 @@ impl Component {
         let response_body =
             String::from_utf8_lossy(&pdforge_response.body().unwrap_or_default()).to_string();
 
-        let json_response: serde_json::Value = serde_json::from_str(&response_body).expect("Failed to parse Pdforge response");
-        
+        let json_response: serde_json::Value =
+            serde_json::from_str(&response_body).expect("Failed to parse Pdforge response");
+
         // note: Content-type is already set by helpers::run_json
         Ok(http::Response::builder()
             .status(status_code)
             .body(json_response)?)
     }
-
 }
 
 #[derive(serde::Deserialize, serde::Serialize, Debug)]
@@ -54,7 +54,6 @@ pub struct Settings {
     pub api_key: String,
     pub template_id: String,
 }
-
 
 impl Settings {
     pub fn new(headers: &http::header::HeaderMap) -> anyhow::Result<Self> {
@@ -100,7 +99,11 @@ mod tests {
             200
         }
         pub fn body(&self) -> Option<Vec<u8>> {
-            Some(json!({"signedUrl": "https://example.com/signed-url"}).to_string().into_bytes())
+            Some(
+                json!({"signedUrl": "https://example.com/signed-url"})
+                    .to_string()
+                    .into_bytes(),
+            )
         }
     }
 
@@ -116,7 +119,9 @@ mod tests {
         let mut headers = http::header::HeaderMap::new();
         headers.insert(
             "x-edgee-component-settings",
-            HeaderValue::from_static(r#"{"api_key": "test_value", "template_id": "test_template_id"}"#),
+            HeaderValue::from_static(
+                r#"{"api_key": "test_value", "template_id": "test_template_id"}"#,
+            ),
         );
 
         let settings = Settings::new(&headers).unwrap();
@@ -168,8 +173,10 @@ mod tests {
         assert!(result.is_ok());
         let resp = result.unwrap();
         assert_eq!(resp.status(), 200);
-        assert_eq!(resp.body().to_string(), r#"{"signedUrl":"https://example.com/signed-url"}"#);
+        assert_eq!(
+            resp.body().to_string(),
+            r#"{"signedUrl":"https://example.com/signed-url"}"#
+        );
         assert!(*SEND_CALLED.lock().unwrap());
     }
-
 }
