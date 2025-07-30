@@ -1,6 +1,7 @@
 mod helpers;
 mod pdforge_payload;
 use bindings::wasi::http::types::{IncomingRequest, ResponseOutparam};
+use helpers::body::Json;
 use pdforge_payload::PdforgeGeneratePdfPayload;
 use std::collections::HashMap;
 
@@ -19,17 +20,17 @@ bindings::export!(Component);
 
 impl bindings::exports::wasi::http::incoming_handler::Guest for Component {
     fn handle(req: IncomingRequest, resp: ResponseOutparam) {
-        helpers::run_json(req, resp, Self::handle_json_request);
+        helpers::run(req, resp, Self::handle_json_request);
     }
 }
 
 impl Component {
     fn handle_json_request(
-        req: http::Request<serde_json::Value>,
-    ) -> Result<http::Response<serde_json::Value>, anyhow::Error> {
+        req: http::Request<Json<serde_json::Value>>,
+    ) -> Result<http::Response<String>, anyhow::Error> {
         let settings = Settings::from_req(&req)?;
 
-        let body = req.body();
+        let Json(body) = req.body();
 
         let payload = PdforgeGeneratePdfPayload::new(body, &settings.template_id);
 
@@ -39,13 +40,11 @@ impl Component {
         let response_body =
             String::from_utf8_lossy(&pdforge_response.body().unwrap_or_default()).to_string();
 
-        let json_response: serde_json::Value =
-            serde_json::from_str(&response_body).expect("Failed to parse Pdforge response");
-
         // note: Content-type is already set by helpers::run_json
         Ok(http::Response::builder()
             .status(status_code)
-            .body(json_response)?)
+            .header("Content-Type", "application/json") // set content-type explicitly
+            .body(response_body)?)
     }
 }
 
@@ -163,7 +162,7 @@ mod tests {
                 "x-edgee-component-settings",
                 r#"{"api_key": "test_value", "template_id": "test_template_id"}"#,
             )
-            .body(body)
+            .body(Json(body))
             .unwrap();
 
         // Call the handler
