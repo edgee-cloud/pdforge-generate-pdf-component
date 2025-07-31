@@ -1,7 +1,7 @@
 mod helpers;
 mod pdforge_payload;
 use bindings::wasi::http::types::{IncomingRequest, ResponseOutparam};
-use helpers::body::Json;
+use helpers::body::{Json, RawJson};
 use pdforge_payload::PdforgeGeneratePdfPayload;
 use std::collections::HashMap;
 
@@ -27,7 +27,7 @@ impl bindings::exports::wasi::http::incoming_handler::Guest for Component {
 impl Component {
     fn handle_json_request(
         req: http::Request<Json<serde_json::Value>>,
-    ) -> Result<http::Response<String>, anyhow::Error> {
+    ) -> Result<http::Response<RawJson<String>>, anyhow::Error> {
         let settings = Settings::from_req(&req)?;
 
         let Json(body) = req.body();
@@ -43,8 +43,7 @@ impl Component {
         // note: Content-type is already set by helpers::run_json
         Ok(http::Response::builder()
             .status(status_code)
-            .header("Content-Type", "application/json") // set content-type explicitly
-            .body(response_body)?)
+            .body(RawJson(response_body))?)
     }
 }
 
@@ -172,8 +171,9 @@ mod tests {
         assert!(result.is_ok());
         let resp = result.unwrap();
         assert_eq!(resp.status(), 200);
+        let RawJson(response_body) = resp.body();
         assert_eq!(
-            resp.body().to_string(),
+            response_body.to_string(),
             r#"{"signedUrl":"https://example.com/signed-url"}"#
         );
         assert!(*SEND_CALLED.lock().unwrap());
